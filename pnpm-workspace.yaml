@@ -1,0 +1,11 @@
+packages:
+  - infra
+  - inventory
+  - shared
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - aws-sdk
+  - esbuild
+  - serverless
+  - unrs-resolver

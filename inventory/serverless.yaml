@@ -1,0 +1,83 @@
+service: inventory
+
+plugins: 
+  - serverless-scriptable-plugin
+
+frameworkVersion: "^4.0.0"
+configValidationMode: error
+useDotenv: true
+
+build:
+  esbuild:
+    configFile: ../esbuild.config.js
+    # root layer build config
+
+custom:
+  prune:
+    automatic: true
+    number: 2
+  addHttpOffline:
+    dev: []
+    local:
+      - httpApi:
+          method: "*"
+          path: '/{proxy+}'
+  scriptable:
+    hooks:
+      before:package:createDeploymentArtifacts:
+        - pnpm install --prod
+
+provider:
+  name: aws
+  region: sa-east-1 # replace with env
+  runtime: nodejs24.x
+  httpApi:
+    cors: true
+  vpc:
+    securityGroupIds:
+      - ${cf:InventoryStack-${sls:stage}.InventoryLambdaSecurityGroupIdParam}
+    subnetIds: 
+      - ${cf:InventoryStack-${sls:stage}.InventorySubnetIds}
+  stage: ${opt:stage, 'dev'}
+  deploymentMethod: direct
+  environment:
+    DB_HOST: ${cf:InventoryStack-${sls:stage}.InventoryDBEndpointParam}
+    DB_LAMBDA_USER: ${env:DB_LAMBDA_USER}
+    DB_LAMBDA_PASSWORD: ${env:DB_LAMBDA_PASSWORD}
+    DB_USERNAME: ${env:DB_USERNAME}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    DB_NAME: ${env:DB_NAME}
+    STAGE: ${env:STAGE}
+  logRetentionInDays: 7
+  logs:
+    logFormat: JSON 
+    applicationLogLevel: INFO
+    systemLogLevel: INFO
+    logGroup: /aws/lambda/global-log-group
+
+package:
+  individually: true
+  excludeDevDependencies: true
+  patterns:
+    - 'src/assets/global-bundle.pem'
+    - '!.git'
+    - '!.github'
+    - '!.gitignore'
+    - '!esbuild.config.js'
+    - '!nest-cli.json'
+    - '!pnpm-lock.yaml'
+    - '!tsconfig*'
+
+functions:
+  inventory:
+    handler: src/main.handler
+    memorySize: 256
+    timeout: 20
+    # url: true
+    events:
+      - httpApi:
+          method: ANY
+          path: /inventory/{proxy+}
+    # ${self:custom.addHttpOffline.${param:stage, self:provider.stage}}
+    layers:
+      - ${cf:shared-infra-${sls:stage}.BaseLayerArn}

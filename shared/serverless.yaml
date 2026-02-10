@@ -1,0 +1,34 @@
+service: shared-infra
+
+plugins: 
+  - serverless-scriptable-plugin
+
+frameworkVersion: "^4.0.0"
+configValidationMode: error
+useDotenv: true
+
+custom:
+  scriptable:
+    hooks:
+      before:package:createDeploymentArtifacts:
+        - node ${env:PWD}/shared/layer-content/nodejs/updateSharedDeps.mjs
+
+provider: 
+  name: aws
+  region: sa-east-1 # replace with env
+
+layers:
+  BaseDeps:
+    path: layer-content
+    description: "Shared dependencies for NestJS apps"
+    compatibleRuntimes:
+      - nodejs24.x
+    package:
+      patterns:
+        - '!*.mjs'
+        - '!pnpm-lock.yaml'
+
+resources:
+  Outputs:
+    BaseLayerArn:
+      Value: !Ref BaseDepsLambdaLayer

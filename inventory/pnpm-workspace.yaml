@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@parcel/watcher'
+  - aws-sdk
+  - esbuild
+  - serverless
+  - unrs-resolver

@@ -1,0 +1,8 @@
+services:
+  shared-layer:
+    path: shared
+  inventory:
+    path: inventory
+    params:
+      BaseLayerArn: ${shared-layer.BaseLayerArn}
+    dependsOn: shared-layer
