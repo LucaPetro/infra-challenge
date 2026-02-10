@@ -4,11 +4,11 @@ set -e
 echo "Loading environment variables"
 source load-env.sh
 
-echo "Updating dependencies"
-pnpm install
-
 echo "Creating infrastructure"
 pnpm deploy-infra
 
+echo "Creating shared layer"
+serverless deploy --service=shared-layer
+
 echo "Creating lambdas"
-pnpm deploy-inventory
+serverless deploy --service=inventory

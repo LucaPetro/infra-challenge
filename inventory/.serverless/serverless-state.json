@@ -1,0 +1,484 @@
+{
+  "service": {
+    "service": "inventory",
+    "serviceObject": {
+      "name": "inventory"
+    },
+    "provider": {
+      "name": "aws",
+      "region": "sa-east-1",
+      "runtime": "nodejs24.x",
+      "httpApi": {
+        "cors": true
+      },
+      "vpc": {
+        "securityGroupIds": [
+          "sg-02b4500d94e6f1f11"
+        ],
+        "subnetIds": [
+          "subnet-0c4f8c298079bb295"
+        ]
+      },
+      "stage": "dev",
+      "deploymentMethod": "direct",
+      "environment": {
+        "DB_HOST": "inventorystack-dev-inventorydbfd2b5bcc-2ry19g5sijj8.clm2me0i0m7y.sa-east-1.rds.amazonaws.com",
+        "DB_LAMBDA_USER": "lambda",
+        "DB_LAMBDA_PASSWORD": "THISISAPASSWORD",
+        "DB_USERNAME": "dbadmin",
+        "DB_PASSWORD": "THISISANOTHERPASSWORD",
+        "DB_NAME": "inventorydb",
+        "STAGE": "dev"
+      },
+      "logRetentionInDays": 7,
+      "logs": {
+        "logFormat": "JSON",
+        "applicationLogLevel": "INFO",
+        "systemLogLevel": "INFO",
+        "logGroup": "/aws/lambda/global-log-group"
+      },
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "InventoryLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/inventory-dev-inventory",
+              "RetentionInDays": 7
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "inventory",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/inventory-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/inventory-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "inventory",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              },
+              "ManagedPolicyArns": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+                    ]
+                  ]
+                }
+              ]
+            }
+          },
+          "InventoryLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-sa-east-1-b836adab-0420",
+                "S3Key": "serverless/inventory/dev/1770695826242-2026-02-10T03:57:06.242Z/inventory-inventory.zip"
+              },
+              "Handler": "src/main.handler",
+              "Runtime": "nodejs24.x",
+              "FunctionName": "inventory-dev-inventory",
+              "MemorySize": 256,
+              "Timeout": 20,
+              "Environment": {
+                "Variables": {
+                  "DB_HOST": "inventorystack-dev-inventorydbfd2b5bcc-2ry19g5sijj8.clm2me0i0m7y.sa-east-1.rds.amazonaws.com",
+                  "DB_LAMBDA_USER": "lambda",
+                  "DB_LAMBDA_PASSWORD": "THISISAPASSWORD",
+                  "DB_USERNAME": "dbadmin",
+                  "DB_PASSWORD": "THISISANOTHERPASSWORD",
+                  "DB_NAME": "inventorydb",
+                  "STAGE": "dev",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"securityGroupIds\"]"
+                },
+                "SubnetIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"subnetIds\"]"
+                }
+              },
+              "Layers": [
+                "arn:aws:lambda:sa-east-1:156041435000:layer:BaseDeps:5"
+              ]
+            },
+            "DependsOn": [
+              "InventoryLogGroup"
+            ]
+          },
+          "InventoryLambdaVersioncrIOUDgGERmzqS0qm3ZIPQnL8Ke80tmPd2mcdVXok": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "InventoryLambdaFunction"
+              },
+              "CodeSha256": "KOp+mjUcyJMRJx31o3V+L4X2TLEV+1jh2+UPbVsGhHA="
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-inventory",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowHeaders": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "AllowMethods": [
+                  "OPTIONS",
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH",
+                  "HEAD",
+                  "DELETE"
+                ],
+                "AllowOrigins": [
+                  "*"
+                ]
+              }
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "InventoryLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "InventoryLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationInventory": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"InventoryLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteAnyInventoryProxyVar": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "ANY /inventory/{proxy+}",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationInventory"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationInventory"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-sa-east-1-b836adab-0420",
+            "Export": {
+              "Name": "sls-inventory-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "InventoryLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "InventoryLambdaVersioncrIOUDgGERmzqS0qm3ZIPQnL8Ke80tmPd2mcdVXok"
+            },
+            "Export": {
+              "Name": "sls-inventory-dev-InventoryLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-inventory-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-inventory-dev-HttpApiUrl"
+            }
+          }
+        }
+      }
+    },
+    "custom": {
+      "prune": {
+        "automatic": true,
+        "number": 2
+      },
+      "addHttpOffline": {
+        "dev": [],
+        "local": [
+          {
+            "httpApi": {
+              "method": "*",
+              "path": "/{proxy+}"
+            }
+          }
+        ]
+      },
+      "scriptable": {
+        "hooks": {
+          "before:package:createDeploymentArtifacts": [
+            "pnpm install --prod"
+          ]
+        }
+      }
+    },
+    "plugins": [
+      "serverless-scriptable-plugin"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "inventory": {
+        "handler": "src/main.handler",
+        "memorySize": 256,
+        "timeout": 20,
+        "events": [
+          {
+            "httpApi": {
+              "method": "ANY",
+              "path": "/inventory/{proxy+}"
+            },
+            "resolvedMethod": "ANY",
+            "resolvedPath": "/inventory/{proxy+}"
+          }
+        ],
+        "layers": {
+          "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"InventoryLambdaFunction\"][\"Properties\"][\"Layers\"]"
+        },
+        "name": "inventory-dev-inventory",
+        "environment": {
+          "NODE_OPTIONS": "--enable-source-maps"
+        },
+        "package": {
+          "artifact": "/home/almarduk/box/challenge/inventory/.serverless/build/inventory-inventory.zip"
+        },
+        "memory": 256,
+        "runtime": "nodejs24.x",
+        "vpc": {},
+        "versionLogicalId": "InventoryLambdaVersioncrIOUDgGERmzqS0qm3ZIPQnL8Ke80tmPd2mcdVXok"
+      }
+    },
+    "configValidationMode": "error",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "service": "inventory",
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "frameworkVersion": "^4.0.0",
+      "configValidationMode": "error",
+      "useDotenv": true,
+      "build": {
+        "esbuild": {
+          "configFile": "../esbuild.config.js"
+        }
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "package": {
+        "individually": true,
+        "excludeDevDependencies": true,
+        "patterns": [
+          "src/assets/global-bundle.pem",
+          "!.git",
+          "!.github",
+          "!.gitignore",
+          "!esbuild.config.js",
+          "!nest-cli.json",
+          "!pnpm-lock.yaml",
+          "!tsconfig*"
+        ],
+        "artifactsS3KeyDirname": "serverless/inventory/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-sa-east-1-b836adab-0420",
+        "artifactDirectoryName": "serverless/inventory/dev/1770695826242-2026-02-10T03:57:06.242Z"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "org": "lucap"
+    },
+    "appId": null,
+    "org": "lucap",
+    "orgId": null,
+    "build": {
+      "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"build\"]"
+    },
+    "layers": {}
+  },
+  "package": {
+    "individually": true,
+    "artifactDirectoryName": "serverless/inventory/dev/1770695826242-2026-02-10T03:57:06.242Z",
+    "artifact": ""
+  }
+}

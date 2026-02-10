@@ -1,0 +1,49 @@
+{
+  "/home/almarduk/box/challenge/serverless-compose.yaml": {
+    "versionFramework": "4.31.2",
+    "servicePath": "/home/almarduk/box/challenge/serverless-compose.yaml",
+    "serviceConfigFileName": "serverless-compose.yaml",
+    "service": {
+      "services": {
+        "shared-layer": {
+          "path": "shared",
+          "component": "serverless-framework"
+        },
+        "inventory": {
+          "path": "inventory",
+          "params": {
+            "BaseLayerArn": "${shared-layer.BaseLayerArn}"
+          },
+          "dependsOn": "shared-layer",
+          "component": "serverless-framework",
+          "parsedParams": {
+            "BaseLayerArn": "arn:aws:lambda:sa-east-1:156041435000:layer:BaseDeps:5"
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "services:\n  shared-layer:\n    path: shared\n  inventory:\n    path: inventory\n    params:\n      BaseLayerArn: ${shared-layer.BaseLayerArn}\n    dependsOn: shared-layer",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "orgId": "a1b171ab-f90a-44b9-909f-05c1b832b876",
+    "orgName": "lucap",
+    "userId": "wk22Q78rdlm8MylK8R",
+    "userName": "lucap",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}

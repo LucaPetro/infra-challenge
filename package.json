@@ -5,14 +5,13 @@
   "main": "index.js",
   "scripts": {
     "deploy-infra": "pnpm --filter ./infra exec cdk deploy --all --require-approval never --context stage=dev",
-    "deploy-inventory": "pnpm --filter ./inventory exec serverless deploy",
-    "deploy-all": "pnpm run deploy-infra && pnpm run deploy-inventory"  },
+    "deploy-shared": "pnpm --filter ./shared exec serverless shared-layer:deploy",
+    "deploy-inventory": "pnpm --filter ./inventory exec serverless inventory:deploy"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.29.1",
-  "devDependencies": {
-  },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.985.0",
     "esbuild-plugin-tsc": "^0.5.0",

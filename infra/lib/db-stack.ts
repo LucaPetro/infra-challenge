@@ -9,8 +9,6 @@ import * as cr from 'aws-cdk-lib/custom-resources';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs'
 
-// move these to dotenv
-
 const { 
     DB_LAMBDA_USER, 
     DB_LAMBDA_PASSWORD,
@@ -20,9 +18,8 @@ const {
     DB_NAME,
 } = process.env;
 
-console.log('///////////////')
 const dbOpts = {
-    name: DB_NAME || 'inventorydb',
+    name: DB_NAME || 'inventory-db',
     user: DB_USERNAME || 'dbadmin',
     password: DB_PASSWORD || '',
     port: parseFloat(DB_PORT || '5432'),
@@ -31,9 +28,6 @@ const dbOpts = {
 export class DatabaseStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props)
-
-        console.log(dbOpts)
-        console.log(process.env.DB_NAME)
 
         const vpc = new ec2.Vpc(this, 'InventoryVpc', {
             maxAzs: 2,
